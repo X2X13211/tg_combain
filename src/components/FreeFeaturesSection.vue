@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {
-  Sparkles, ShieldCheck, Zap, Bot, Users, CheckCircle2,
+  ShieldCheck, Zap, Bot, Users, CheckCircle2,
   Lock
 } from '@lucide/vue'
 
@@ -102,22 +102,6 @@ defineEmits<{
               </p>
               <div class="free-badge-pill">
                 <CheckCircle2 :size="14" /> Мгновенный отчет по статусам
-              </div>
-            </div>
-          </div>
-
-          <!-- 6. 10 Accounts Forever -->
-          <div class="free-item highlight-item">
-            <div class="free-icon-box special-icon">
-              <Sparkles :size="24" class="free-icon" />
-            </div>
-            <div class="free-content">
-              <h3 class="free-item-title">10 аккаунтов без подписки навсегда</h3>
-              <p class="free-item-desc">
-                Загрузите 10 сессий (.session или .tdata), проверьте их живучесть, оформите профили и управляйте ими через Telegram Web. Подписка потребуется только тогда, когда вы решите запустить модули массового трафика.
-              </p>
-              <div class="free-badge-pill highlight-pill">
-                <CheckCircle2 :size="14" /> Без кредитной карты
               </div>
             </div>
           </div>

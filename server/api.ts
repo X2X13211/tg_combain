@@ -654,7 +654,7 @@ apiApp.post('/api/telegram/mtproto/sign-in', async (req: Request, res: Response)
   }
   const result = await signInWithCode(phone, code, password)
   if (result.success) {
-    addLog('success', `[MTProto] Аккаунт ${phone} успешно авторизован! Все реальные диалоги загружены.`)
+    addLog('success', `[MTProto] Аккаунт ${phone} успешно авторизован.`)
   } else {
     addLog('error', `[MTProto] Ошибка авторизации: ${result.error}`)
   }

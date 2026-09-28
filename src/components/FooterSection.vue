@@ -25,20 +25,20 @@
           </div>
 
           <p class="footer-desc">
-            Облачный ИИ-комбайн для Telegram: парсинг каналов и чатов, нейрокомментинг, прогрев и защита сессий. Все 15 модулей включены в любой тариф от 899 ₽/мес.
+            Облачный ИИ-комбайн для Telegram: парсинг каналов и чатов, нейрокомментинг, прогрев и защита сессий. Все модули включены в любой тариф от 899 ₽/мес.
           </p>
         </div>
 
         <!-- Links Columns -->
         <div class="footer-links-grid">
           <div class="footer-col">
-            <h4 class="col-title">Модули</h4>
+            <h4 class="col-title">Возможности</h4>
             <ul class="col-links">
-              <li><a href="#modules">Нейрокомментинг</a></li>
-              <li><a href="#modules">Инвайтинг в группы</a></li>
-              <li><a href="#modules">МассРеакции и Масслукинг</a></li>
-              <li><a href="#modules">ЛС и Чат-рассылки</a></li>
-              <li><a href="#modules">Парсер каналов и участников</a></li>
+              <li><a href="#demo">Нейрокомментинг</a></li>
+              <li><a href="#demo">Инвайтинг в группы</a></li>
+              <li><a href="#demo">Автопрогрев и GGR</a></li>
+              <li><a href="#demo">Парсер каналов и чатов</a></li>
+              <li><a href="#demo">Встроенный Telegram Web</a></li>
             </ul>
           </div>
 

@@ -3,7 +3,6 @@ import { ref } from 'vue'
 import Navbar from './components/Navbar.vue'
 import HeroSection from './components/HeroSection.vue'
 import InteractivePanel from './components/InteractivePanel.vue'
-import ModulesSection from './components/ModulesSection.vue'
 import FreeFeaturesSection from './components/FreeFeaturesSection.vue'
 import PricingSection from './components/PricingSection.vue'
 import ToolsSection from './components/ToolsSection.vue'
@@ -40,7 +39,7 @@ if (currentUser.value && window.location.hash === '#cabinet') {
 window.addEventListener('hashchange', () => {
   if (window.location.hash === '#cabinet' && currentUser.value) {
     currentView.value = 'cabinet'
-  } else if (!window.location.hash || window.location.hash === '#' || window.location.hash.startsWith('#demo') || window.location.hash.startsWith('#pricing') || window.location.hash.startsWith('#modules') || window.location.hash.startsWith('#tools') || window.location.hash.startsWith('#faq')) {
+  } else if (!window.location.hash || window.location.hash === '#' || window.location.hash.startsWith('#demo') || window.location.hash.startsWith('#pricing') || window.location.hash.startsWith('#tools') || window.location.hash.startsWith('#faq')) {
     currentView.value = 'landing'
   }
 })
@@ -160,11 +159,6 @@ const scrollToDemo = () => {
       <InteractivePanel
         @open-web-telegram="openWebTelegram"
         @open-add-account="isAddAccountOpen = true"
-      />
-
-      <!-- 15 Automation Modules Filterable Section -->
-      <ModulesSection
-        @select-module="openCheckout('3m')"
       />
 
       <!-- 4-Step Workflow -->

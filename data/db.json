@@ -7,6 +7,38 @@
       "password": "password123",
       "plan": "pro_full",
       "createdAt": "2026-09-28T17:00:00.000Z"
+    },
+    {
+      "id": "usr_mulk5y1l",
+      "username": "qwqwqwq",
+      "email": "qwqwqwq@gmail.com",
+      "password": "12345678",
+      "plan": "full_access",
+      "createdAt": "2026-09-28T18:05:39.609Z"
+    },
+    {
+      "id": "usr_mulk6x8v",
+      "username": "wqqqwqqw",
+      "email": "wqqqwqqw@gmail.com",
+      "password": "12345678",
+      "plan": "full_access",
+      "createdAt": "2026-09-28T18:06:25.231Z"
+    },
+    {
+      "id": "usr_mulk7fm2",
+      "username": "wqqw",
+      "email": "qwqwq@gmail.com",
+      "password": "12345678",
+      "plan": "full_access",
+      "createdAt": "2026-09-28T18:06:49.034Z"
+    },
+    {
+      "id": "usr_mulk7l1n",
+      "username": "wqqw",
+      "email": "qwqwqewe@gmail.com",
+      "password": "12345678",
+      "plan": "full_access",
+      "createdAt": "2026-09-28T18:06:56.075Z"
     }
   ],
   "accounts": [
@@ -261,7 +293,7 @@
       "id": "1790617414506",
       "time": "20:43:34",
       "type": "success",
-      "text": "[MTProto] Аккаунт +1 659 667 3133 успешно авторизован! Все реальные диалоги загружены."
+      "text": "[MTProto] Аккаунт +1 659 667 3133 успешно авторизован."
     },
     {
       "id": "1790617428504",
@@ -370,6 +402,66 @@
       "time": "21:01:51",
       "type": "ai",
       "text": "[NeuroComment] Сгенерирован комментарий (стиль: expert, ниша: Криптовалюта и P2P)"
+    },
+    {
+      "id": "1790618577564",
+      "time": "21:02:57",
+      "type": "info",
+      "text": "[Parser] Запущен парсер целевой аудитории из загруженного файла (4 чатов)"
+    },
+    {
+      "id": "1790618579572",
+      "time": "21:02:59",
+      "type": "success",
+      "text": "[Parser] Сбор завершен: 4 чатов обработано, 292 активных пользователей"
+    },
+    {
+      "id": "1790618739611",
+      "time": "21:05:39",
+      "type": "info",
+      "text": "[Auth] Создан профиль для входа: qwqwqwq"
+    },
+    {
+      "id": "1790618742385",
+      "time": "21:05:42",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: qwqwqwq"
+    },
+    {
+      "id": "1790618752142",
+      "time": "21:05:52",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: qwqwqwq"
+    },
+    {
+      "id": "1790618773864",
+      "time": "21:06:13",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: qwqwqwq"
+    },
+    {
+      "id": "1790618785233",
+      "time": "21:06:25",
+      "type": "info",
+      "text": "[Auth] Создан профиль для входа: wqqqwqqw"
+    },
+    {
+      "id": "1790618809037",
+      "time": "21:06:49",
+      "type": "success",
+      "text": "[Auth] Новый пользователь зарегистрирован: wqqw (qwqwq@gmail.com)"
+    },
+    {
+      "id": "1790618816077",
+      "time": "21:06:56",
+      "type": "success",
+      "text": "[Auth] Новый пользователь зарегистрирован: wqqw (qwqwqewe@gmail.com)"
+    },
+    {
+      "id": "1790618820126",
+      "time": "21:07:00",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: qwqwqwq"
     }
   ],
   "telegramChats": [
