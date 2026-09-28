@@ -7,7 +7,8 @@ import {
   signInWithCode,
   importDirectSession,
   syncRealDialogs,
-  sendMtprotoMessage
+  sendMtprotoMessage,
+  fetchRealChatMessages
 } from './mtproto.ts'
 
 export const apiApp = express()
@@ -424,6 +425,27 @@ apiApp.get('/api/telegram/chats', (_req: Request, res: Response) => {
   res.json({ chats: db.telegramChats || [] })
 })
 
+apiApp.get('/api/telegram/chats/:id/messages', async (req: Request, res: Response) => {
+  const id = String(req.params.id)
+  const db = readDb()
+  const chat = (db.telegramChats || []).find(c => c.id === id)
+
+  try {
+    const realMessages = await fetchRealChatMessages(id, 40)
+    if (realMessages.length > 0) {
+      if (chat) {
+        chat.messages = realMessages
+        const last = realMessages[realMessages.length - 1]
+        if (last) chat.lastMsg = last.text
+        writeDb(db)
+      }
+      return res.json({ messages: realMessages })
+    }
+  } catch {}
+
+  res.json({ messages: chat?.messages || [] })
+})
+
 apiApp.post('/api/telegram/chats', (req: Request, res: Response) => {
   const { username, name } = req.body
   if (!username && !name) {
@@ -509,10 +531,18 @@ apiApp.post('/api/telegram/messages', async (req: Request, res: Response) => {
   addLog('info', `[Telegram Web: +1 659 667 3133] Отправлено сообщение в «${chat.name}»: "${text}"`)
 
   // Attempt real MTProto transmission if live session is active
+  let mtError: string | undefined = undefined
   try {
-    const mtRes = await sendMtprotoMessage(chat.name, text)
+    const peerToUse = (chat.id.startsWith('chat_') && chat.name.startsWith('@'))
+      ? chat.name
+      : (chat.id === 'saved' ? 'me' : chat.id)
+
+    const mtRes = await sendMtprotoMessage(peerToUse, text)
     if (mtRes.success) {
-      addLog('success', `[MTProto Engine] Сообщение доставлено на серверы Telegram (DC)`)
+      addLog('success', `[MTProto Engine] Сообщение доставлено в Telegram: «${chat.name}» (ID: ${mtRes.messageId})`)
+    } else if (mtRes.error) {
+      mtError = mtRes.error
+      addLog('warning', `[MTProto Engine: ${chat.name}] ${mtRes.error}`)
     }
   } catch {}
 
@@ -534,7 +564,7 @@ apiApp.post('/api/telegram/messages', async (req: Request, res: Response) => {
   }
 
   writeDb(db)
-  res.json({ message: userMsg, botReply, chat })
+  res.json({ message: userMsg, botReply, chat, error: mtError })
 })
 
 // ----------------------------------------------------

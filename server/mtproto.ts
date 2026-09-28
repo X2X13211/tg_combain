@@ -248,6 +248,39 @@ export async function syncRealDialogs(): Promise<TelegramChatRecord[]> {
   }
 }
 
+export async function fetchRealChatMessages(peerId: string, limit = 50): Promise<TelegramChatMessage[]> {
+  try {
+    const cl = await getOrInitClient()
+    const isAuth = await cl.checkAuthorization()
+    if (!isAuth) return []
+
+    let targetPeer: any = peerId
+    if (peerId === 'saved' || peerId === 'Избранное') {
+      targetPeer = 'me'
+    }
+
+    const msgs = await cl.getMessages(targetPeer, { limit })
+    const result: TelegramChatMessage[] = []
+
+    for (const m of msgs) {
+      if (!m || !m.id) continue
+      const date = m.date ? new Date(m.date * 1000) : new Date()
+      const timeStr = `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
+      result.push({
+        id: String(m.id),
+        text: m.message || (m.media ? '📷 Медиафайл' : 'Сервисное сообщение'),
+        fromMe: Boolean(m.out),
+        time: timeStr
+      })
+    }
+
+    return result.reverse()
+  } catch (err) {
+    console.error('fetchRealChatMessages error:', err)
+    return []
+  }
+}
+
 export async function sendMtprotoMessage(peer: string, messageText: string): Promise<{ success: boolean; error?: string; messageId?: string }> {
   try {
     const cl = await getOrInitClient()
@@ -256,10 +289,16 @@ export async function sendMtprotoMessage(peer: string, messageText: string): Pro
       return { success: false, error: 'MTProto клиент не авторизован' }
     }
 
-    const res = await cl.sendMessage(peer, { message: messageText })
+    let targetPeer: any = peer
+    if (peer === 'saved' || peer === 'Избранное' || peer === 'me') {
+      targetPeer = 'me'
+    }
+
+    const res = await cl.sendMessage(targetPeer, { message: messageText })
     return { success: true, messageId: String(res.id) }
   } catch (err: any) {
     console.error('sendMtprotoMessage error:', err)
-    return { success: false, error: err.message || 'Ошибка отправки через MTProto' }
+    return { success: false, error: err.errorMessage || err.message || 'Ошибка отправки через MTProto' }
   }
 }
+

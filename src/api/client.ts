@@ -201,6 +201,12 @@ export const apiClient = {
       return res.json()
     },
 
+    async getChatMessages(chatId: string): Promise<{ messages: TelegramChatMessage[] }> {
+      const res = await fetch(`${API_BASE}/api/telegram/chats/${encodeURIComponent(chatId)}/messages`)
+      if (!res.ok) return { messages: [] }
+      return res.json()
+    },
+
     async addChat(username: string): Promise<{ chat: TelegramChat }> {
       const res = await fetch(`${API_BASE}/api/telegram/chats`, {
         method: 'POST',

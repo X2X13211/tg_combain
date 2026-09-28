@@ -11,7 +11,8 @@ import {
   Key,
   ShieldCheck,
   AlertCircle,
-  Smartphone
+  Smartphone,
+  Lock
 } from '@lucide/vue'
 import { apiClient, type TelegramChat, type TelegramChatMessage } from '../api/client'
 
@@ -24,10 +25,12 @@ const emit = defineEmits<{
 }>()
 
 // State
-const activeChatId = ref<string>('spambot')
+const activeChatId = ref<string>('')
 const newMessage = ref('')
 const searchQuery = ref('')
 const isAddingChat = ref(false)
+const isLoadingMessages = ref(false)
+const sendError = ref('')
 const messagesContainer = ref<HTMLElement | null>(null)
 
 // MTProto Auth & Sync State
@@ -42,76 +45,7 @@ const authError = ref('')
 const authHint = ref('')
 const isSyncing = ref(false)
 
-const chats = ref<TelegramChat[]>([
-  {
-    id: 'tg_service',
-    name: 'Telegram',
-    avatar: 'T',
-    verified: true,
-    lastMsg: 'Успешный вход через MTProto US DC5 (IP: 180.254.199.250)',
-    time: '20:00',
-    unread: 0,
-    type: 'service',
-    messages: [
-      {
-        id: 'm1',
-        text: 'Уведомление безопасности Telegram:\nУспешная авторизация в аккаунт.\nСессия: Target Agent (+1 659 667 3133)\nПрокси: socks5://180.254.199.250:8080 (DC5 US)\nКлиент: X2X Combine Web MTProto Engine v3.9',
-        fromMe: false,
-        time: '20:00'
-      }
-    ]
-  },
-  {
-    id: 'spambot',
-    name: 'SpamBot',
-    avatar: 'S',
-    verified: true,
-    lastMsg: 'Ваш аккаунт полностью чист. Никаких жалоб или ограничений не зафиксировано.',
-    time: '20:19',
-    unread: 0,
-    type: 'bot',
-    messages: [
-      { id: 'm2', text: '/start', fromMe: true, time: '20:00' },
-      { id: 'm3', text: 'Доброго времени суток! Рад сообщить, что на Ваш аккаунт сейчас не наложено никаких ограничений. Вы можете свободно отправлять сообщения в группы и писать в ЛС.', fromMe: false, time: '20:01' }
-    ]
-  },
-  {
-    id: 'saved',
-    name: 'Избранное',
-    avatar: '★',
-    verified: false,
-    lastMsg: 'Конфигурация комбайна X2X-SMM',
-    time: '20:02',
-    unread: 0,
-    type: 'saved',
-    messages: [
-      {
-        id: 'm4',
-        text: 'Рабочая связка X2X-SMM:\n• Аккаунт: +1 659 667 3133\n• Прокси: socks5://180.254.199.250:8080\n• Статус: Валидный (GGR 98/100)\n• Назначенная роль: Нейрокомментинг & Парсинг',
-        fromMe: true,
-        time: '20:02'
-      }
-    ]
-  },
-  {
-    id: 'durov',
-    name: 'Durov\'s Channel',
-    avatar: 'D',
-    verified: true,
-    lastMsg: 'Telegram ecosystem updates and decentralized features',
-    time: '19:45',
-    unread: 0,
-    type: 'channel',
-    messages: [
-      {
-        id: 'm5',
-        text: 'Telegram has reached over 950 million monthly active users. We continue improving our developer API, mini apps platform, and high-speed channels.',
-        fromMe: false,
-        time: '19:45'
-      }
-    ]
-  }
-])
+const chats = ref<TelegramChat[]>([])
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -121,16 +55,44 @@ const scrollToBottom = () => {
   })
 }
 
+const loadChatHistory = async (chatId: string) => {
+  if (!chatId) return
+  isLoadingMessages.value = true
+  try {
+    const res = await apiClient.telegram.getChatMessages(chatId)
+    if (res.messages && res.messages.length > 0) {
+      const target = chats.value.find(c => c.id === chatId)
+      if (target) {
+        target.messages = res.messages
+        const last = res.messages[res.messages.length - 1]
+        if (last) target.lastMsg = last.text
+      }
+      scrollToBottom()
+    }
+  } catch (err) {
+    console.warn('loadChatHistory error:', err)
+  }
+  isLoadingMessages.value = false
+}
+
+const selectChat = async (chatId: string) => {
+  activeChatId.value = chatId
+  sendError.value = ''
+  scrollToBottom()
+  await loadChatHistory(chatId)
+}
+
 const loadChats = async () => {
   try {
     const res = await apiClient.telegram.getChats()
     if (res.chats && res.chats.length > 0) {
       chats.value = res.chats
-      // Keep activeChatId valid
-      if (!chats.value.some(c => c.id === activeChatId.value)) {
+      if (!activeChatId.value || !chats.value.some(c => c.id === activeChatId.value)) {
         activeChatId.value = chats.value[0].id
       }
-      scrollToBottom()
+      if (activeChatId.value) {
+        await loadChatHistory(activeChatId.value)
+      }
     }
   } catch (err) {
     console.warn('loadChats err:', err)
@@ -150,7 +112,6 @@ const checkMtproto = async () => {
 onMounted(async () => {
   await checkMtproto()
   await loadChats()
-  scrollToBottom()
 })
 
 const filteredChats = computed(() => {
@@ -163,11 +124,6 @@ const activeChat = computed(() => {
   return chats.value.find(c => c.id === activeChatId.value) || chats.value[0] || null
 })
 
-const selectChat = (chatId: string) => {
-  activeChatId.value = chatId
-  scrollToBottom()
-}
-
 const addNewChat = async () => {
   if (!searchQuery.value.trim()) return
   const query = searchQuery.value.trim()
@@ -177,11 +133,11 @@ const addNewChat = async () => {
     if (res.chat) {
       const existing = chats.value.find(c => c.id === res.chat.id)
       if (!existing) {
-        chats.value.push(res.chat)
+        chats.value.unshift(res.chat)
       }
       activeChatId.value = res.chat.id
       searchQuery.value = ''
-      scrollToBottom()
+      await loadChatHistory(res.chat.id)
     }
   } catch (err) {
     console.error('addNewChat err:', err)
@@ -194,6 +150,7 @@ const sendMessage = async () => {
   const currentChat = activeChat.value
   const textToSend = newMessage.value.trim()
   newMessage.value = ''
+  sendError.value = ''
 
   const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   const newMsg: TelegramChatMessage = {
@@ -218,7 +175,8 @@ const sendMessage = async () => {
         scrollToBottom()
       }, 350)
     }
-  } catch (err) {
+  } catch (err: any) {
+    sendError.value = 'Ошибка отправки: канал может быть только для чтения (CHAT_WRITE_FORBIDDEN)'
     console.error('sendMessage err:', err)
   }
 }
@@ -299,7 +257,7 @@ const handleSyncDialogs = async () => {
     if (res.chats && res.chats.length > 0) {
       chats.value = res.chats
       activeChatId.value = chats.value[0].id
-      scrollToBottom()
+      await loadChatHistory(activeChatId.value)
     }
   } catch (err) {
     console.error('sync err:', err)
@@ -331,7 +289,7 @@ const handleSyncDialogs = async () => {
           </div>
         </div>
 
-        <button class="tg-close-btn" @click="$emit('close')">✕</button>
+        <button class="tg-close-btn" title="Закрыть окно" @click="$emit('close')">✕</button>
       </div>
 
       <!-- Real MTProto Session & Dialog Sync Bar -->
@@ -351,6 +309,7 @@ const handleSyncDialogs = async () => {
             <button
               class="btn-sync-dialogs"
               :disabled="isSyncing"
+              title="Загрузить актуальный список всех чатов из Telegram"
               @click="handleSyncDialogs"
             >
               <RefreshCw :size="13" :class="{ 'spin-anim': isSyncing }" />
@@ -444,9 +403,9 @@ const handleSyncDialogs = async () => {
         </div>
       </div>
 
-      <!-- Telegram Web Layout -->
+      <!-- Telegram Web Main Layout -->
       <div class="tg-web-body">
-        <!-- Left Chats List -->
+        <!-- Left Chats Sidebar (Scrollable) -->
         <aside class="tg-chats-sidebar">
           <div class="tg-search-bar">
             <Search :size="14" class="search-ic" />
@@ -478,14 +437,14 @@ const handleSyncDialogs = async () => {
               <div class="tg-chat-avatar">{{ chat.avatar }}</div>
               <div class="tg-chat-meta">
                 <div class="tg-chat-name-row">
-                  <span class="tg-chat-name">
+                  <span class="tg-chat-name" :title="chat.name">
                     {{ chat.name }}
                     <CheckCircle2 v-if="chat.verified" :size="13" class="verified-ic" />
                   </span>
                   <span class="tg-chat-time">{{ chat.time }}</span>
                 </div>
                 <div class="tg-chat-last-row">
-                  <span class="tg-chat-last">{{ chat.lastMsg }}</span>
+                  <span class="tg-chat-last" :title="chat.lastMsg">{{ chat.lastMsg }}</span>
                   <span v-if="chat.unread" class="tg-unread-badge">{{ chat.unread }}</span>
                 </div>
               </div>
@@ -493,13 +452,16 @@ const handleSyncDialogs = async () => {
           </div>
         </aside>
 
-        <!-- Right Active Chat Window -->
+        <!-- Right Active Chat Window (Scrollable Messages + Always Pinned Input) -->
         <main class="tg-chat-window">
+          <!-- Chat Header -->
           <div class="tg-chat-head">
             <div>
               <div class="active-chat-name">
-                {{ activeChat?.name || 'Чат' }}
+                <span>{{ activeChat?.name || 'Выберите чат' }}</span>
                 <CheckCircle2 v-if="activeChat?.verified" :size="14" class="verified-ic" />
+                <span v-if="activeChat?.type === 'channel'" class="badge-channel font-mono">Канал</span>
+                <span v-else-if="activeChat?.type === 'group'" class="badge-group font-mono">Группа</span>
               </div>
               <div class="active-chat-status">
                 <span class="online-indicator"></span> в сети через {{ account?.proxy || 'socks5://180.254.199.250:8080' }} (DC5 US)
@@ -507,7 +469,13 @@ const handleSyncDialogs = async () => {
             </div>
           </div>
 
+          <!-- Messages Scroll Area -->
           <div ref="messagesContainer" class="tg-messages-area">
+            <div v-if="isLoadingMessages" class="loading-history-indicator">
+              <RefreshCw :size="14" class="spin-anim" />
+              <span>Загрузка истории с серверов Telegram...</span>
+            </div>
+
             <div
               v-for="m in activeChat?.messages"
               :key="m.id"
@@ -522,6 +490,13 @@ const handleSyncDialogs = async () => {
             </div>
           </div>
 
+          <!-- Send Error Alert if restricted -->
+          <div v-if="sendError" class="chat-warning-banner">
+            <Lock :size="13" />
+            <span>{{ sendError }}</span>
+          </div>
+
+          <!-- Input Bar (Pinned at bottom) -->
           <div class="tg-input-bar">
             <button class="tg-tool-btn" title="Прикрепить файл"><Paperclip :size="18" /></button>
             <input
@@ -532,7 +507,7 @@ const handleSyncDialogs = async () => {
               @keyup.enter="sendMessage"
             />
             <button class="tg-tool-btn" title="Смайлы"><Smile :size="18" /></button>
-            <button class="tg-send-btn" title="Отправить" @click="sendMessage">
+            <button class="tg-send-btn" title="Отправить сообщение" @click="sendMessage">
               <Send :size="16" />
             </button>
           </div>
@@ -544,9 +519,11 @@ const handleSyncDialogs = async () => {
 
 <style scoped>
 .web-tg-modal {
-  max-width: 950px;
+  max-width: 1000px;
   width: 96%;
-  height: 680px;
+  height: 85vh;
+  max-height: 760px;
+  min-height: 520px;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -564,6 +541,7 @@ const handleSyncDialogs = async () => {
   padding: 12px 18px;
   background: #0b1324;
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  flex-shrink: 0;
 }
 
 .tg-info {
@@ -649,6 +627,7 @@ const handleSyncDialogs = async () => {
   background: rgba(15, 23, 42, 0.95);
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
   font-size: 0.78rem;
+  flex-shrink: 0;
 }
 
 .mtproto-bar.mtproto-active {
@@ -749,6 +728,7 @@ const handleSyncDialogs = async () => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .input-panel-header {
@@ -850,16 +830,22 @@ const handleSyncDialogs = async () => {
 /* Telegram Web Layout */
 .tg-web-body {
   display: grid;
-  grid-template-columns: 290px 1fr;
+  grid-template-columns: 310px 1fr;
   flex: 1;
+  min-height: 0;
+  height: 100%;
   overflow: hidden;
 }
 
+/* Sidebar with independent scrolling */
 .tg-chats-sidebar {
   background: #0b1220;
   border-right: 1px solid rgba(148, 163, 184, 0.1);
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .tg-search-bar {
@@ -869,6 +855,7 @@ const handleSyncDialogs = async () => {
   gap: 8px;
   background: rgba(15, 23, 42, 0.6);
   border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  flex-shrink: 0;
 }
 
 .search-ic {
@@ -910,14 +897,24 @@ const handleSyncDialogs = async () => {
 
 .tg-chats-list {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.tg-chats-list::-webkit-scrollbar {
+  width: 5px;
+}
+.tg-chats-list::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.2);
+  border-radius: 4px;
 }
 
 .tg-chat-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 11px 14px;
   cursor: pointer;
   border-bottom: 1px solid rgba(148, 163, 184, 0.05);
   transition: background 0.15s;
@@ -997,6 +994,7 @@ const handleSyncDialogs = async () => {
   padding: 1px 6px;
   border-radius: 10px;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
 .verified-ic {
@@ -1014,10 +1012,13 @@ const handleSyncDialogs = async () => {
   margin-right: 4px;
 }
 
-/* Chat Window */
+/* Chat Window with independent scrolling */
 .tg-chat-window {
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
   background: #090e1a;
   background-image: radial-gradient(rgba(0, 136, 204, 0.04) 1px, transparent 1px);
   background-size: 20px 20px;
@@ -1027,6 +1028,7 @@ const handleSyncDialogs = async () => {
   padding: 12px 18px;
   background: #0d1526;
   border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  flex-shrink: 0;
 }
 
 .active-chat-name {
@@ -1035,7 +1037,25 @@ const handleSyncDialogs = async () => {
   color: #ffffff;
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+}
+
+.badge-channel {
+  font-size: 0.65rem;
+  background: rgba(148, 163, 184, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #94a3b8;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.badge-group {
+  font-size: 0.65rem;
+  background: rgba(0, 136, 204, 0.15);
+  border: 1px solid rgba(0, 136, 204, 0.3);
+  color: #38bdf8;
+  padding: 1px 6px;
+  border-radius: 4px;
 }
 
 .active-chat-status {
@@ -1046,15 +1066,37 @@ const handleSyncDialogs = async () => {
 
 .tg-messages-area {
   flex: 1;
-  padding: 18px;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+}
+
+.tg-messages-area::-webkit-scrollbar {
+  width: 6px;
+}
+.tg-messages-area::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.25);
+  border-radius: 4px;
+}
+
+.loading-history-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  font-size: 0.76rem;
+  color: #38bdf8;
+  background: rgba(0, 136, 204, 0.1);
+  border-radius: 8px;
 }
 
 .tg-msg-bubble {
-  max-width: 72%;
+  max-width: 74%;
   padding: 10px 14px;
   border-radius: 14px;
   font-size: 0.88rem;
@@ -1098,6 +1140,19 @@ const handleSyncDialogs = async () => {
   color: #a5f3fc;
 }
 
+.chat-warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(245, 158, 11, 0.15);
+  border-top: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+/* Pinned Input Bar */
 .tg-input-bar {
   display: flex;
   align-items: center;
@@ -1105,6 +1160,7 @@ const handleSyncDialogs = async () => {
   padding: 12px 18px;
   background: #0d1526;
   border-top: 1px solid rgba(148, 163, 184, 0.1);
+  flex-shrink: 0;
 }
 
 .tg-tool-btn {
@@ -1118,6 +1174,7 @@ const handleSyncDialogs = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .tg-tool-btn:hover {
@@ -1153,6 +1210,7 @@ const handleSyncDialogs = async () => {
   justify-content: center;
   cursor: pointer;
   transition: transform 0.15s, background 0.15s;
+  flex-shrink: 0;
 }
 
 .tg-send-btn:hover {

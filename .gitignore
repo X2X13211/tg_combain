@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Sensitive Telegram MTProto sessions
+data/telegram_session.txt
