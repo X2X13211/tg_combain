@@ -34,7 +34,6 @@ const isMobileOpen = ref(false)
 
       <!-- Desktop Navigation Links -->
       <nav class="nav-links">
-        <a href="#demo" class="nav-link">Панель</a>
         <a href="#pricing" class="nav-link">Тарифы</a>
         <a href="#tools" class="nav-link">Инструменты</a>
         <a href="#faq" class="nav-link">FAQ</a>
@@ -70,7 +69,6 @@ const isMobileOpen = ref(false)
     <!-- Mobile Dropdown Menu -->
     <div v-if="isMobileOpen" class="mobile-menu">
       <div class="mobile-menu-inner">
-        <a href="#demo" class="mobile-link" @click="isMobileOpen = false">Панель комбайна</a>
         <a href="#pricing" class="mobile-link" @click="isMobileOpen = false">Тарифы</a>
         <a href="#tools" class="mobile-link" @click="isMobileOpen = false">Инструменты</a>
         <a href="#faq" class="mobile-link" @click="isMobileOpen = false">FAQ</a>

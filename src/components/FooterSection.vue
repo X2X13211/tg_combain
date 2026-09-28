@@ -34,11 +34,11 @@
           <div class="footer-col">
             <h4 class="col-title">Возможности</h4>
             <ul class="col-links">
-              <li><a href="#demo">Нейрокомментинг</a></li>
-              <li><a href="#demo">Инвайтинг в группы</a></li>
-              <li><a href="#demo">Автопрогрев и GGR</a></li>
-              <li><a href="#demo">Парсер каналов и чатов</a></li>
-              <li><a href="#demo">Встроенный Telegram Web</a></li>
+              <li><a href="#pricing">Нейрокомментинг</a></li>
+              <li><a href="#pricing">Инвайтинг в группы</a></li>
+              <li><a href="#pricing">Автопрогрев и GGR</a></li>
+              <li><a href="#pricing">Парсер каналов и чатов</a></li>
+              <li><a href="#tools">Встроенный Telegram Web</a></li>
             </ul>
           </div>
 

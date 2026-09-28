@@ -39,6 +39,22 @@
       "password": "12345678",
       "plan": "full_access",
       "createdAt": "2026-09-28T18:06:56.075Z"
+    },
+    {
+      "id": "usr_mulke47c",
+      "username": "вмвм",
+      "email": "qwqqwqwwqqwqwq@gmail.com",
+      "password": "121212",
+      "plan": "full_access",
+      "createdAt": "2026-09-28T18:12:00.840Z"
+    },
+    {
+      "id": "usr_mulkf1ue",
+      "username": "dddd",
+      "email": "god@gmail.com",
+      "password": "123456",
+      "plan": "full_access",
+      "createdAt": "2026-09-28T18:12:44.438Z"
     }
   ],
   "accounts": [
@@ -462,6 +478,42 @@
       "time": "21:07:00",
       "type": "info",
       "text": "[Auth] Успешный вход в систему: qwqwqwq"
+    },
+    {
+      "id": "1790619099741",
+      "time": "21:11:39",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: qwqwqwq"
+    },
+    {
+      "id": "1790619120843",
+      "time": "21:12:00",
+      "type": "success",
+      "text": "[Auth] Новый пользователь зарегистрирован: вмвм (qwqqwqwwqqwqwq@gmail.com)"
+    },
+    {
+      "id": "1790619164440",
+      "time": "21:12:44",
+      "type": "success",
+      "text": "[Auth] Новый пользователь зарегистрирован: dddd (god@gmail.com)"
+    },
+    {
+      "id": "1790619174117",
+      "time": "21:12:54",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: dddd"
+    },
+    {
+      "id": "1790619175253",
+      "time": "21:12:55",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: dddd"
+    },
+    {
+      "id": "1790619176028",
+      "time": "21:12:56",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: dddd"
     }
   ],
   "telegramChats": [

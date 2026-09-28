@@ -148,9 +148,6 @@ const copyBio = (text: string, idx: number) => {
         <h2 class="section-title">
           Бесплатные инструменты
         </h2>
-        <p class="section-subtitle">
-          Утилиты для проверки прокси, анализа Telegram-аккаунтов и генерации описаний профилей.
-        </p>
       </div>
 
       <!-- Tool Switcher Tabs -->

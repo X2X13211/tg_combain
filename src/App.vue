@@ -2,7 +2,6 @@
 import { ref } from 'vue'
 import Navbar from './components/Navbar.vue'
 import HeroSection from './components/HeroSection.vue'
-import InteractivePanel from './components/InteractivePanel.vue'
 import FreeFeaturesSection from './components/FreeFeaturesSection.vue'
 import PricingSection from './components/PricingSection.vue'
 import ToolsSection from './components/ToolsSection.vue'
@@ -111,13 +110,6 @@ const openWebTelegram = (acc: any) => {
   selectedAccountForWeb.value = acc
   isWebTelegramOpen.value = true
 }
-
-const scrollToDemo = () => {
-  const el = document.getElementById('demo')
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth' })
-  }
-}
 </script>
 
 <template>
@@ -151,23 +143,15 @@ const scrollToDemo = () => {
       <HeroSection
         :current-user="currentUser"
         @open-register="openRegister"
+        @open-login="openLogin"
         @open-cabinet="openCabinet"
-        @scroll-to-demo="scrollToDemo"
-      />
-
-      <!-- Interactive Live Combine Simulator (Панель X2X-SMM) -->
-      <InteractivePanel
-        @open-web-telegram="openWebTelegram"
-        @open-add-account="isAddAccountOpen = true"
       />
 
       <!-- 4-Step Workflow -->
       <WorkflowSection />
 
       <!-- 100% Free Capabilities ($0 / 0 ₽) -->
-      <FreeFeaturesSection
-        @open-checkout="openCheckout('1m')"
-      />
+      <FreeFeaturesSection />
 
       <!-- Transparent Pricing Section (899 ₽ / 1999 ₽ / 4999 ₽) -->
       <PricingSection

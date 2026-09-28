@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, Play } from '@lucide/vue'
+import { ArrowRight } from '@lucide/vue'
 
 defineProps<{
   currentUser?: { username: string; email: string } | null
@@ -8,7 +8,7 @@ defineProps<{
 defineEmits<{
   (e: 'open-register'): void
   (e: 'open-cabinet'): void
-  (e: 'scroll-to-demo'): void
+  (e: 'open-login'): void
 }>()
 </script>
 
@@ -41,9 +41,9 @@ defineEmits<{
           <span>Зарегистрироваться</span>
           <ArrowRight :size="17" />
         </button>
-        <button class="btn btn-secondary btn-lg" @click="$emit('scroll-to-demo')">
-          <Play :size="15" fill="currentColor" />
-          <span>Демо-панель</span>
+        <button class="btn btn-secondary btn-lg" @click="$emit('open-login')">
+          <span>Попробовать</span>
+          <ArrowRight :size="15" />
         </button>
       </div>
     </div>

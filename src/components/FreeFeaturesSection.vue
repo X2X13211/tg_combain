@@ -3,10 +3,6 @@ import {
   ShieldCheck, Zap, Bot, Users, CheckCircle2,
   Lock
 } from '@lucide/vue'
-
-defineEmits<{
-  (e: 'open-checkout'): void
-}>()
 </script>
 
 <template>
@@ -20,9 +16,6 @@ defineEmits<{
               <h2 class="free-main-title">Что доступно бесплатно</h2>
             </div>
           </div>
-          <button class="btn btn-primary" @click="$emit('open-checkout')">
-            <span>Добавить 10 аккаунтов</span>
-          </button>
         </div>
 
         <div class="free-grid">
