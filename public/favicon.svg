@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
+  <defs>
+    <linearGradient id="xGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="50%" stop-color="#0088CC" />
+      <stop offset="100%" stop-color="#0055AA" />
+    </linearGradient>
+    <linearGradient id="neonGlow" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#0284C7" stop-opacity="0.2" />
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="12" fill="#0B132B" stroke="#0088CC" stroke-width="1.5" />
+  <!-- stylized X2X glyph -->
+  <path d="M12 14L20 24L12 34" stroke="url(#xGrad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="24" cy="24" r="4.5" fill="#00D2FF" fill-opacity="0.2" stroke="#00D2FF" stroke-width="2.5" />
+  <circle cx="24" cy="24" r="1.8" fill="#FFFFFF" />
+  <path d="M36 14L28 24L36 34" stroke="url(#xGrad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
