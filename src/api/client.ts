@@ -219,6 +219,45 @@ export const apiClient = {
       })
       if (!res.ok) throw new Error('Ошибка отправки сообщения')
       return res.json()
+    },
+
+    async getMtprotoStatus(): Promise<{ authorized: boolean; phone: string; hasSession: boolean }> {
+      const res = await fetch(`${API_BASE}/api/telegram/mtproto/status`)
+      if (!res.ok) throw new Error('Ошибка статуса MTProto')
+      return res.json()
+    },
+
+    async sendMtprotoCode(phone: string, proxy?: string): Promise<{ success: boolean; phoneCodeHash?: string; error?: string; hint?: string }> {
+      const res = await fetch(`${API_BASE}/api/telegram/mtproto/send-code`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, proxy })
+      })
+      return res.json()
+    },
+
+    async signInMtproto(phone: string, code: string, password?: string): Promise<{ success: boolean; error?: string }> {
+      const res = await fetch(`${API_BASE}/api/telegram/mtproto/sign-in`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, code, password })
+      })
+      return res.json()
+    },
+
+    async importSession(session: string): Promise<{ success: boolean; error?: string }> {
+      const res = await fetch(`${API_BASE}/api/telegram/mtproto/import-session`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session })
+      })
+      return res.json()
+    },
+
+    async syncDialogs(): Promise<{ chats: TelegramChat[] }> {
+      const res = await fetch(`${API_BASE}/api/telegram/mtproto/sync-dialogs`, { method: 'POST' })
+      if (!res.ok) throw new Error('Ошибка синхронизации диалогов')
+      return res.json()
     }
   }
 }

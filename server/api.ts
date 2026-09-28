@@ -1,6 +1,14 @@
 import express, { type Request, type Response } from 'express'
 import cors from 'cors'
 import { readDb, writeDb, type AccountRecord, type LogRecord, type UserRecord, type TelegramChatRecord, type TelegramChatMessage } from './db.ts'
+import {
+  checkAuthStatus,
+  requestAuthCode,
+  signInWithCode,
+  importDirectSession,
+  syncRealDialogs,
+  sendMtprotoMessage
+} from './mtproto.ts'
 
 export const apiApp = express()
 
@@ -457,7 +465,7 @@ apiApp.post('/api/telegram/chats', (req: Request, res: Response) => {
   res.status(201).json({ chat: newChat })
 })
 
-apiApp.post('/api/telegram/messages', (req: Request, res: Response) => {
+apiApp.post('/api/telegram/messages', async (req: Request, res: Response) => {
   const { chatId, text } = req.body
   if (!chatId || !text) {
     return res.status(400).json({ error: 'chatId и text обязательны' })
@@ -465,9 +473,22 @@ apiApp.post('/api/telegram/messages', (req: Request, res: Response) => {
 
   const db = readDb()
   if (!db.telegramChats) db.telegramChats = []
-  const chat = db.telegramChats.find(c => c.id === chatId)
+  
+  let chat = db.telegramChats.find(c => c.id === chatId || c.name.toLowerCase() === chatId.toLowerCase())
   if (!chat) {
-    return res.status(404).json({ error: 'Чат не найден' })
+    const clean = chatId.replace(/^@/, '')
+    chat = {
+      id: chatId,
+      name: chatId.startsWith('@') ? chatId : '@' + clean,
+      avatar: clean[0]?.toUpperCase() || 'TG',
+      verified: false,
+      lastMsg: text,
+      time: 'только что',
+      unread: 0,
+      type: 'group',
+      messages: []
+    }
+    db.telegramChats.push(chat)
   }
 
   const now = new Date()
@@ -480,15 +501,24 @@ apiApp.post('/api/telegram/messages', (req: Request, res: Response) => {
     time: timeStr
   }
 
+  if (!chat.messages) chat.messages = []
   chat.messages.push(userMsg)
   chat.lastMsg = text
   chat.time = timeStr
 
   addLog('info', `[Telegram Web: +1 659 667 3133] Отправлено сообщение в «${chat.name}»: "${text}"`)
 
-  // Automated bot response for @SpamBot
+  // Attempt real MTProto transmission if live session is active
+  try {
+    const mtRes = await sendMtprotoMessage(chat.name, text)
+    if (mtRes.success) {
+      addLog('success', `[MTProto Engine] Сообщение доставлено на серверы Telegram (DC)`)
+    }
+  } catch {}
+
+  // Automated bot response for @SpamBot or echo
   let botReply: TelegramChatMessage | null = null
-  if (chat.id === 'spambot') {
+  if (chat.id === 'spambot' || chat.name.toLowerCase().includes('spambot')) {
     const replyText = text.trim() === '/start' || text.toLowerCase().includes('start')
       ? 'Доброго времени суток! Рад сообщить, что на Ваш аккаунт сейчас не наложено никаких ограничений. Вы можете свободно отправлять сообщения в группы и писать в ЛС.'
       : 'Ваш аккаунт полностью чист. Никаких жалоб или ограничений не зафиксировано.'
@@ -505,4 +535,55 @@ apiApp.post('/api/telegram/messages', (req: Request, res: Response) => {
 
   writeDb(db)
   res.json({ message: userMsg, botReply, chat })
+})
+
+// ----------------------------------------------------
+// 10. MTProto Real Authorization & Live Dialogs API
+// ----------------------------------------------------
+apiApp.get('/api/telegram/mtproto/status', async (_req: Request, res: Response) => {
+  const status = await checkAuthStatus()
+  res.json(status)
+})
+
+apiApp.post('/api/telegram/mtproto/send-code', async (req: Request, res: Response) => {
+  const { phone = '+16596673133', proxy = 'socks5://180.254.199.250:8080' } = req.body
+  const result = await requestAuthCode(phone, proxy)
+  if (result.success) {
+    addLog('info', `[MTProto] Запрошен официальный код авторизации Telegram на ${phone}`)
+  } else {
+    addLog('warning', `[MTProto] Запрос кода: ${result.error || 'Прокси недоступен, проверка через прямой шлюз'}`)
+  }
+  res.json(result)
+})
+
+apiApp.post('/api/telegram/mtproto/sign-in', async (req: Request, res: Response) => {
+  const { phone = '+16596673133', code, password } = req.body
+  if (!code) {
+    return res.status(400).json({ error: 'Код подтверждения обязателен' })
+  }
+  const result = await signInWithCode(phone, code, password)
+  if (result.success) {
+    addLog('success', `[MTProto] Аккаунт ${phone} успешно авторизован! Все реальные диалоги загружены.`)
+  } else {
+    addLog('error', `[MTProto] Ошибка авторизации: ${result.error}`)
+  }
+  res.json(result)
+})
+
+apiApp.post('/api/telegram/mtproto/import-session', async (req: Request, res: Response) => {
+  const { session } = req.body
+  if (!session) {
+    return res.status(400).json({ error: 'Строка сессии обязательна' })
+  }
+  const result = await importDirectSession(session)
+  if (result.success) {
+    addLog('success', `[MTProto] Сессия успешно импортирована. Реальные чаты загружены.`)
+  }
+  res.json(result)
+})
+
+apiApp.post('/api/telegram/mtproto/sync-dialogs', async (_req: Request, res: Response) => {
+  const chats = await syncRealDialogs()
+  addLog('success', `[MTProto] Синхронизировано ${chats.length} реальных диалогов из Telegram`)
+  res.json({ chats })
 })
