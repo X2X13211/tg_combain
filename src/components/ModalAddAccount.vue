@@ -13,7 +13,7 @@ const importMode = ref<'session' | 'tdata' | 'phone'>('session')
 const phoneInput = ref('+1 659 667 3133')
 const proxyInput = ref('socks5://180.254.199.250:8080')
 const roleInput = ref('Нейрокомментинг & Парсинг')
-const autoWarm = ref(true)
+const autoWarm = ref(false)
 const isUploading = ref(false)
 const isSuccess = ref(false)
 
@@ -66,7 +66,6 @@ const handleImport = async () => {
       <div v-else>
         <div class="add-header">
           <h3 class="add-title">Импорт Telegram-аккаунта</h3>
-          <p class="add-subtitle">Первые 10 аккаунтов добавляются бесплатно. Загрузите сессию или авторизуйтесь по номеру.</p>
         </div>
 
         <!-- Mode Tabs -->
@@ -122,19 +121,11 @@ const handleImport = async () => {
           <select v-model="roleInput" class="input-field select-input">
             <option value="Нейрокомментинг & Парсинг">Нейрокомментинг & Парсинг</option>
             <option value="Нейрокомментинг">Нейрокомментинг</option>
-            <option value="Нейрочаттинг">Нейрочаттинг</option>
             <option value="Умный Парсер">Умный Парсер</option>
             <option value="Автопрогрев">Автопрогрев</option>
             <option value="ЛС-Рассылки">ЛС-Рассылки</option>
             <option value="Снятие блока">Снятие блока</option>
           </select>
-        </div>
-
-        <div class="checkbox-group mt-3">
-          <label class="checkbox-label">
-            <input v-model="autoWarm" type="checkbox" checked />
-            <span>Автоматически запустить прогрев</span>
-          </label>
         </div>
 
         <div class="add-footer">

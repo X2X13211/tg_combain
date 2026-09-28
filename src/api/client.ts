@@ -117,44 +117,46 @@ export const apiClient = {
     }
   },
 
-  // 3. AI Neurocommenting API
+  // 3. AI Neurocommenting API (RouterAI & Local)
   ai: {
-    async generateComment(niche: string, tone: string): Promise<{ comment: string; confidence: number }> {
+    async generateComment(params: {
+      niche?: string
+      tone?: string
+      prompt?: string
+      postText?: string
+      apiKey?: string
+      model?: string
+      baseUrl?: string
+    }): Promise<{ comment: string; confidence: number; provider?: string; model?: string }> {
       const res = await fetch(`${API_BASE}/api/ai/comment/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ niche, tone })
+        body: JSON.stringify(params)
       })
       if (!res.ok) throw new Error('Ошибка генерации комментария')
-      return res.json()
-    },
-
-    async getChatMessages(): Promise<{ messages: any[] }> {
-      const res = await fetch(`${API_BASE}/api/ai/chat/messages`)
-      if (!res.ok) throw new Error('Ошибка загрузки сообщений')
-      return res.json()
-    },
-
-    async sendChatMessage(text: string, author?: string) {
-      const res = await fetch(`${API_BASE}/api/ai/chat/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, author })
-      })
-      if (!res.ok) throw new Error('Ошибка отправки сообщения')
       return res.json()
     }
   },
 
   // 4. Parser API
   parser: {
-    async start(keywords: string) {
+    async start(keywords?: string) {
       const res = await fetch(`${API_BASE}/api/parser/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ keywords })
       })
       if (!res.ok) throw new Error('Ошибка запуска парсера')
+      return res.json()
+    },
+
+    async importChats(chats: string[]): Promise<{ success: boolean; count: number; chats: string[] }> {
+      const res = await fetch(`${API_BASE}/api/parser/import-chats`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chats })
+      })
+      if (!res.ok) throw new Error('Ошибка импорта чатов')
       return res.json()
     },
 

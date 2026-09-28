@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import {
-  Users, User, MessageSquare, Bot, Search, ShieldCheck, Terminal,
+  Users, User, MessageSquare, Search, ShieldCheck, Terminal,
   CheckCircle2, AlertTriangle, RefreshCw, ExternalLink,
-  Sparkles, Send, Check, Clock, Sliders,
+  Sparkles, Check, Clock, Sliders,
   Eye, Download
 } from '@lucide/vue'
 
@@ -13,7 +13,7 @@ const emit = defineEmits<{
 }>()
 
 // Active tab
-const activeTab = ref<'accounts' | 'commenting' | 'chatting' | 'parser' | 'warming' | 'logs'>('accounts')
+const activeTab = ref<'accounts' | 'commenting' | 'parser' | 'warming' | 'logs'>('accounts')
 
 // 1. ACCOUNTS MANAGER DATA & STATE
 interface Account {
@@ -29,7 +29,7 @@ interface Account {
 
 const accountsList = ref<Account[]>([
   { id: '1', phone: '+7 916 ••• 42 18', name: 'Александр В.', status: 'valid', proxy: 'socks5://de-static:8080', geo: 'DE 🇩🇪', ggr: 94, role: 'Нейрокомментинг' },
-  { id: '2', phone: '+48 512 ••• 907', name: 'Marek Nowak', status: 'valid', proxy: 'socks5://pl-static:8080', geo: 'PL 🇵🇱', ggr: 91, role: 'Нейрочаттинг' },
+  { id: '2', phone: '+48 512 ••• 907', name: 'Marek Nowak', status: 'valid', proxy: 'socks5://pl-static:8080', geo: 'PL 🇵🇱', ggr: 91, role: 'Умный Парсер' },
   { id: '3', phone: '+52 55 ••• 3310', name: 'Carlos Mendez', status: 'warming', proxy: 'socks5://mx-mobile:4120', geo: 'MX 🇲🇽', ggr: 86, role: 'Прогрев (День 4)' },
   { id: '4', phone: '+44 7700 ••• 514', name: 'David Smith', status: 'valid', proxy: 'socks5://gb-static:9050', geo: 'GB 🇬🇧', ggr: 98, role: 'ЛС-Рассылки' },
   { id: '5', phone: '+34 612 ••• 882', name: 'Sofia Rodriguez', status: 'spamblock', proxy: 'socks5://es-res:3128', geo: 'ES 🇪🇸', ggr: 64, role: 'Снятие блока' }
@@ -100,14 +100,7 @@ const generateComment = () => {
   }, 750)
 }
 
-// 3. NEURO-CHATTING SIMULATOR
-const chatMessages = ref([
-  { id: 1, author: 'Carlos (Аккаунт 1)', text: 'Народ, кто тестил продвижение в Telegram через комбайны? Что сейчас реально работает без бана?', time: '14:20' },
-  { id: 2, author: 'Marek (Аккаунт 2)', text: 'Я с прошлой недели сижу на X2X-SMM. До этого 3 софта менял, вечно сессии слетали. Тут встроенный прогрев + защита, аккаунты живут стабильно.', time: '14:21' },
-  { id: 3, author: 'Александр (Аккаунт 3)', text: 'Подтверждаю, главное прокси нормальные ставить и лимиты не задирать выше 35 сообщений. У меня конвертит отлично в связке с нейрокомментингом.', time: '14:22' },
-  { id: 4, author: 'Carlos (Аккаунт 1)', text: 'Ого, а капчи ботов в чатах он сам проходит? Или антикапчу отдельно подключать надо?', time: '14:23' },
-  { id: 5, author: 'Marek (Аккаунт 2)', text: 'Всё внутри бесплатно решает прямо в сценарии, даже токенов не просит. Рекомендую протестить на 10 бесплатных акках.', time: '14:24' }
-])
+
 
 // 4. PARSER STATE
 const parserKeywords = ref('криптовалюта, p2p, арбитраж, трейдинг')
@@ -210,15 +203,6 @@ const logs = ref([
                 <MessageSquare :size="16" />
                 <span>Нейрокомментинг</span>
                 <span class="tab-badge">ИИ</span>
-              </button>
-
-              <button
-                class="nav-tab-btn"
-                :class="{ active: activeTab === 'chatting' }"
-                @click="activeTab = 'chatting'"
-              >
-                <Bot :size="16" />
-                <span>Нейрочаттинг</span>
               </button>
 
               <button
@@ -438,48 +422,7 @@ const logs = ref([
               </div>
             </div>
 
-            <!-- TAB 3: NEURO-CHATTING -->
-            <div v-else-if="activeTab === 'chatting'" class="tab-content">
-              <div class="content-header">
-                <div>
-                  <h3 class="tab-title">Нейрочаттинг в группах</h3>
-                  <p class="tab-desc">Несколько ваших аккаунтов органично общаются в целевых чатах, подогревая интерес аудитории к вашему продукту.</p>
-                </div>
-                <div class="badge badge-success">
-                  <CheckCircle2 :size="14" /> 3 аккаунта в диалоге
-                </div>
-              </div>
 
-              <div class="chat-simulator-wrapper">
-                <div class="chat-header-bar">
-                  <div class="chat-group-title">💬 Чат: «Крипта и Арбитраж СНГ» (18 400 участников)</div>
-                </div>
-
-                <div class="chat-messages-box">
-                  <div
-                    v-for="msg in chatMessages"
-                    :key="msg.id"
-                    class="sim-message"
-                  >
-                    <div class="msg-avatar">{{ msg.author[0] }}</div>
-                    <div class="msg-content">
-                      <div class="msg-top">
-                        <span class="msg-author">{{ msg.author }}</span>
-                        <span class="msg-time">{{ msg.time }}</span>
-                      </div>
-                      <div class="msg-text">{{ msg.text }}</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="chat-sim-footer">
-                  <input type="text" class="input-field" placeholder="Добавить реплику в сценарий диалога..." readonly value="Нейросеть автоматически подстраивает реплики под контекст сообщений в чате">
-                  <button class="btn btn-primary btn-sm" @click="generateComment">
-                    <Send :size="16" />
-                  </button>
-                </div>
-              </div>
-            </div>
 
             <!-- TAB 4: PARSER -->
             <div v-else-if="activeTab === 'parser'" class="tab-content">

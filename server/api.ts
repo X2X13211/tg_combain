@@ -254,10 +254,90 @@ const AI_COMMENT_TEMPLATES = {
   ]
 }
 
-apiApp.post('/api/ai/comment/generate', (req: Request, res: Response) => {
-  const { tone = 'expert', niche = 'Криптовалюта' } = req.body
+apiApp.post('/api/ai/comment/generate', async (req: Request, res: Response) => {
+  const {
+    tone = 'expert',
+    niche = 'Криптовалюта',
+    prompt = '',
+    postText = '',
+    apiKey = '',
+    model = 'openai/gpt-4o-mini',
+    baseUrl = 'https://routerai.ru/api/v1'
+  } = req.body
+
+  // If user provided a RouterAI API key
+  if (apiKey && String(apiKey).trim()) {
+    try {
+      const cleanBaseUrl = String(baseUrl || 'https://routerai.ru/api/v1').replace(/\/+$/, '')
+      const systemPrompt = String(prompt).trim() ||
+        'Ты профессиональный Telegram SMM-комментатор. Пиши живые, естественные, цепляющие комментарии на русском языке от имени реального человека. Избегай шаблонных фраз и откровенной рекламы. Пиши кратко (1-3 предложения), провоцируя обсуждение.'
+
+      const userMessage = postText && String(postText).trim()
+        ? `Напиши комментарий к следующему посту в нише "${niche}", стиль ответа: "${tone}".\nТекст поста:\n"""${postText}"""`
+        : `Напиши экспертный и вовлекающий комментарий для Telegram-канала в нише "${niche}". Стиль: "${tone}".`
+
+      const resp = await fetch(`${cleanBaseUrl}/chat/completions`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${String(apiKey).trim()}`
+        },
+        body: JSON.stringify({
+          model: String(model).trim() || 'openai/gpt-4o-mini',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userMessage }
+          ],
+          temperature: 0.7,
+          max_tokens: 300
+        })
+      })
+
+      if (resp.ok) {
+        const data = (await resp.json()) as any
+        const aiText = data.choices?.[0]?.message?.content?.trim()
+        if (aiText) {
+          addLog('ai', `[RouterAI: ${model}] Сгенерирован комментарий по промпту (ниша: ${niche})`)
+          return res.json({
+            comment: aiText,
+            niche,
+            tone,
+            model,
+            provider: 'RouterAI (' + model + ')',
+            confidence: 0.99,
+            generatedAt: new Date().toISOString()
+          })
+        }
+      } else {
+        const errText = await resp.text()
+        console.warn('RouterAI HTTP error:', resp.status, errText)
+        addLog('warning', `[RouterAI] Ошибка API (${resp.status}): ${errText.slice(0, 100)}`)
+      }
+    } catch (err: any) {
+      console.error('RouterAI request failed:', err)
+      addLog('warning', `[RouterAI] Ошибка запроса к ${baseUrl}: ${err.message}`)
+    }
+  }
+
+  // Fallback: smart dynamic generation using niche, prompt, and tone
   const list = AI_COMMENT_TEMPLATES[tone as keyof typeof AI_COMMENT_TEMPLATES] || AI_COMMENT_TEMPLATES.expert
-  const comment = list[Math.floor(Math.random() * list.length)]
+  let comment = list[Math.floor(Math.random() * list.length)]
+  if (prompt && String(prompt).trim()) {
+    const p = String(prompt).trim()
+    if (tone === 'expert') {
+      comment = `По теме «${niche}»: ${p.slice(0, 70)}... Главное учитывать объёмы и ликвидность на дистанции.`
+    } else {
+      comment = `Отличный пост по теме «${niche}»! ${p.slice(0, 70)}... Результаты превзошли ожидания 👍`
+    }
+  } else if (niche) {
+    if (tone === 'expert') {
+      comment = `В направлении «${niche}» сейчас решающий фактор — скорость адаптации и контроль рисков. Те, кто действуют системно, забирают основной профит.`
+    } else if (tone === 'casual') {
+      comment = `Кстати, по теме «${niche}» сейчас отличная динамика! Сам слежу за подобными кейсами уже несколько недель 🔥`
+    } else if (tone === 'question') {
+      comment = `А как в «${niche}» сейчас обстоят дела с конверсией в повторные касания? Замеряли статистику за прошлый месяц?`
+    }
+  }
 
   addLog('ai', `[NeuroComment] Сгенерирован комментарий (стиль: ${tone}, ниша: ${niche})`)
 
@@ -265,63 +345,14 @@ apiApp.post('/api/ai/comment/generate', (req: Request, res: Response) => {
     comment,
     niche,
     tone,
+    provider: 'Локальная модель X2X',
     confidence: 0.98,
     generatedAt: new Date().toISOString()
   })
 })
 
 // ----------------------------------------------------
-// 5. AI Neurochatting API
-// ----------------------------------------------------
-const DEFAULT_CHAT_MESSAGES = [
-  { id: 1, author: 'Target Agent (+1 659 667 3133)', time: '20:00', text: 'Сессия MTProto активна через socks5://180.254.199.250:8080. Чат-модуль готов к работе.' }
-]
-
-apiApp.get('/api/ai/chat/messages', (_req: Request, res: Response) => {
-  res.json({ messages: DEFAULT_CHAT_MESSAGES })
-})
-
-apiApp.post('/api/ai/chat/send', (req: Request, res: Response) => {
-  const { text, author = 'Вы' } = req.body
-  if (!text) {
-    return res.status(400).json({ error: 'Текст сообщения не может быть пустым' })
-  }
-
-  const now = new Date()
-  const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
-
-  const userMsg = {
-    id: Date.now(),
-    author,
-    time: timeStr,
-    text
-  }
-
-  addLog('info', `[NeuroChat: +1 659 667 3133] Отправлено сообщение в чат: "${text}"`)
-
-  // Automated bot response simulation
-  const replies = [
-    'Да, полностью согласен с этим наблюдением.',
-    'Кстати, у нас по той же связке конверсия выросла почти вдвое.',
-    'Главное соблюдать интервалы между отправками сообщений.',
-    'Принято в обработку, диалог продолжается.'
-  ]
-  const botReplyText = replies[Math.floor(Math.random() * replies.length)]
-  const botReply = {
-    id: Date.now() + 100,
-    author: 'Telegram Network',
-    time: timeStr,
-    text: botReplyText
-  }
-
-  res.json({
-    userMessage: userMsg,
-    botReply
-  })
-})
-
-// ----------------------------------------------------
-// 6. Smart Parser API
+// 5. Smart Parser API
 // ----------------------------------------------------
 interface ParserState {
   isParsing: boolean
@@ -329,6 +360,7 @@ interface ParserState {
   channelsCount: number
   usersCount: number
   keywords: string
+  fileChats: string[]
 }
 
 let parserState: ParserState = {
@@ -336,32 +368,61 @@ let parserState: ParserState = {
   progress: 0,
   channelsCount: 0,
   usersCount: 0,
-  keywords: 'крипта, p2p, арбитраж, трафик'
+  keywords: 'крипта, p2p, арбитраж, трафик',
+  fileChats: []
 }
 
 apiApp.post('/api/parser/start', (req: Request, res: Response) => {
   const { keywords } = req.body
   parserState.isParsing = true
   parserState.progress = 0
-  parserState.channelsCount = 0
+  parserState.channelsCount = parserState.fileChats.length > 0 ? parserState.fileChats.length : 0
   parserState.usersCount = 0
   parserState.keywords = keywords || parserState.keywords
 
-  addLog('info', `[Parser] Запущен парсер целевой аудитории по ключевым словам: "${parserState.keywords}"`)
+  const sourceDesc = parserState.fileChats.length > 0
+    ? `из загруженного файла (${parserState.fileChats.length} чатов)`
+    : `по ключевым словам: "${parserState.keywords}"`
+
+  addLog('info', `[Parser] Запущен парсер целевой аудитории ${sourceDesc}`)
 
   const interval = setInterval(() => {
     parserState.progress = Math.min(100, parserState.progress + 20)
-    parserState.channelsCount += Math.floor(Math.random() * 8) + 4
+    if (parserState.fileChats.length === 0) {
+      parserState.channelsCount += Math.floor(Math.random() * 8) + 4
+    }
     parserState.usersCount += Math.floor(Math.random() * 60) + 25
 
     if (parserState.progress >= 100) {
       clearInterval(interval)
       parserState.isParsing = false
-      addLog('success', `[Parser] Сбор завершен: ${parserState.channelsCount} каналов с комментариями, ${parserState.usersCount} активных пользователей`)
+      addLog('success', `[Parser] Сбор завершен: ${parserState.channelsCount} чатов обработано, ${parserState.usersCount} активных пользователей`)
     }
   }, 400)
 
   res.json({ status: 'started', state: parserState })
+})
+
+apiApp.post('/api/parser/import-chats', (req: Request, res: Response) => {
+  const { chats } = req.body
+  if (!Array.isArray(chats) || chats.length === 0) {
+    return res.status(400).json({ error: 'Список чатов пуст или не передан' })
+  }
+
+  const cleanList = chats
+    .map(c => String(c).trim().replace(/^https?:\/\/t\.me\//i, '@').replace(/^\/?/, ''))
+    .filter(c => c.length > 1)
+    .map(c => c.startsWith('@') ? c : '@' + c)
+
+  parserState.fileChats = cleanList
+  parserState.channelsCount = cleanList.length
+  addLog('info', `[Parser] Загружен файл со списком чатов: ${cleanList.length} чатов готово к парсингу`)
+
+  res.json({
+    success: true,
+    count: cleanList.length,
+    chats: cleanList
+  })
 })
 
 apiApp.get('/api/parser/status', (_req: Request, res: Response) => {

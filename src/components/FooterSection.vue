@@ -35,7 +35,7 @@
             <h4 class="col-title">Модули</h4>
             <ul class="col-links">
               <li><a href="#modules">Нейрокомментинг</a></li>
-              <li><a href="#modules">Нейрочаттинг в группах</a></li>
+              <li><a href="#modules">Инвайтинг в группы</a></li>
               <li><a href="#modules">МассРеакции и Масслукинг</a></li>
               <li><a href="#modules">ЛС и Чат-рассылки</a></li>
               <li><a href="#modules">Парсер каналов и участников</a></li>
