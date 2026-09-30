@@ -76,6 +76,7 @@ apiApp.post('/api/auth/register', (req: Request, res: Response) => {
   addLog('success', `[Auth] Новый пользователь зарегистрирован: ${newUser.username} (${newUser.email})`)
 
   res.json({
+    success: true,
     user: { id: newUser.id, username: newUser.username, email: newUser.email, plan: newUser.plan },
     token: 'jwt_' + Buffer.from(newUser.id).toString('base64')
   })
@@ -108,6 +109,7 @@ apiApp.post('/api/auth/login', (req: Request, res: Response) => {
     addLog('info', `[Auth] Создан профиль для входа: ${newUser.username}`)
 
     return res.json({
+      success: true,
       user: { id: newUser.id, username: newUser.username, email: newUser.email, plan: newUser.plan },
       token: 'jwt_' + Buffer.from(newUser.id).toString('base64')
     })
@@ -116,6 +118,7 @@ apiApp.post('/api/auth/login', (req: Request, res: Response) => {
   addLog('info', `[Auth] Успешный вход в систему: ${user.username}`)
 
   res.json({
+    success: true,
     user: { id: user.id, username: user.username, email: user.email, plan: user.plan },
     token: 'jwt_' + Buffer.from(user.id).toString('base64')
   })

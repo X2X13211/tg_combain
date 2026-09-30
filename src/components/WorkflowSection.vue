@@ -36,13 +36,10 @@ const steps = [
 <template>
   <section class="workflow-section">
     <div class="container">
-      <div class="section-head text-center">
+      <div class="section-head workflow-head-left">
         <h2 class="section-title">
           Как работает <span class="text-gradient-cyan">X2X-SMM</span>
         </h2>
-        <p class="section-subtitle">
-          Запуск автоматизации за 4 простых шага.
-        </p>
       </div>
 
       <div class="workflow-grid">
@@ -69,9 +66,10 @@ const steps = [
   padding: 60px 0;
 }
 
-.section-head {
-  max-width: 760px;
-  margin: 0 auto 40px;
+.workflow-head-left {
+  text-align: left;
+  max-width: 100%;
+  margin: 0 0 32px 0;
 }
 
 .section-title {

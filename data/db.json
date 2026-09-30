@@ -55,6 +55,22 @@
       "password": "123456",
       "plan": "full_access",
       "createdAt": "2026-09-28T18:12:44.438Z"
+    },
+    {
+      "id": "usr_muodlx0c",
+      "username": "testuser",
+      "email": "test@example.com",
+      "password": "password123",
+      "plan": "full_access",
+      "createdAt": "2026-09-30T17:25:25.980Z"
+    },
+    {
+      "id": "usr_muodv54g",
+      "username": "agent_test",
+      "email": "agent_test@example.com",
+      "password": "mypassword",
+      "plan": "full_access",
+      "createdAt": "2026-09-30T17:32:36.400Z"
     }
   ],
   "accounts": [
@@ -514,6 +530,30 @@
       "time": "21:12:56",
       "type": "info",
       "text": "[Auth] Успешный вход в систему: dddd"
+    },
+    {
+      "id": "1790789125981",
+      "time": "20:25:25",
+      "type": "success",
+      "text": "[Auth] Новый пользователь зарегистрирован: testuser (test@example.com)"
+    },
+    {
+      "id": "1790789403036",
+      "time": "20:30:03",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: testuser"
+    },
+    {
+      "id": "1790789556401",
+      "time": "20:32:36",
+      "type": "success",
+      "text": "[Auth] Новый пользователь зарегистрирован: agent_test (agent_test@example.com)"
+    },
+    {
+      "id": "1790789569399",
+      "time": "20:32:49",
+      "type": "info",
+      "text": "[Auth] Успешный вход в систему: agent_test"
     }
   ],
   "telegramChats": [

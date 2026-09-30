@@ -36,9 +36,6 @@ const cases = [
         <h2 class="section-title">
           Кому подходит <span class="text-gradient-cyan">X2X-SMM</span>
         </h2>
-        <p class="section-subtitle">
-          Готовые связки для решения типовых задач продвижения в Telegram.
-        </p>
       </div>
 
       <div class="cases-grid">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { Check, Zap, ShieldCheck, ArrowRight } from '@lucide/vue'
+import { Check, Zap, ArrowRight } from '@lucide/vue'
 
 defineEmits<{
   (e: 'select-plan', planId: string): void
@@ -90,15 +90,6 @@ const plans = [
         <h2 class="section-title">
           Тарифные планы <span class="text-gradient-cyan">X2X-SMM</span>
         </h2>
-        <p class="section-subtitle">
-          В каждом тарифе доступно всё без ограничений и скрытых доплат.
-        </p>
-
-        <!-- Big Guarantee Banner -->
-        <div class="all-included-banner">
-          <ShieldCheck :size="18" class="banner-icon" />
-          <span><strong>В каждом тарифе доступно всё:</strong> 15 модулей комбайна с момента подключения.</span>
-        </div>
       </div>
 
       <!-- Pricing Cards Grid -->

@@ -50,8 +50,9 @@ const handleLogin = async () => {
   isSubmitting.value = true
   try {
     const res = await apiClient.auth.login(loginEmail.value.trim(), loginPassword.value)
-    if (res.success && res.user) {
-      successUser.value = { username: res.user.username, email: res.user.email }
+    if (res && (res.user || res.success)) {
+      const u = res.user || { username: loginEmail.value.split('@')[0], email: loginEmail.value.trim() }
+      successUser.value = { username: u.username, email: u.email }
       isSuccess.value = true
 
       try {
@@ -61,9 +62,9 @@ const handleLogin = async () => {
       setTimeout(() => {
         emit('auth-success', successUser.value)
         emit('close')
-      }, 900)
+      }, 700)
     } else {
-      errorMessage.value = res.error || 'Неверный логин или пароль'
+      errorMessage.value = res?.error || 'Неверный логин или пароль'
     }
   } catch (err: any) {
     errorMessage.value = err.message || 'Ошибка соединения с сервером'
@@ -94,10 +95,11 @@ const handleRegister = async () => {
   isSubmitting.value = true
   try {
     const res = await apiClient.auth.register(registerUsername.value.trim(), registerEmail.value.trim(), registerPassword.value)
-    if (res.success && res.user) {
+    if (res && (res.user || res.success)) {
+      const u = res.user || { username: registerUsername.value.trim(), email: registerEmail.value.trim() }
       successUser.value = {
-        username: res.user.username,
-        email: res.user.email
+        username: u.username,
+        email: u.email
       }
       isSuccess.value = true
 
@@ -108,9 +110,9 @@ const handleRegister = async () => {
       setTimeout(() => {
         emit('auth-success', successUser.value)
         emit('close')
-      }, 900)
+      }, 700)
     } else {
-      errorMessage.value = res.error || 'Ошибка при создании аккаунта'
+      errorMessage.value = res?.error || 'Ошибка при создании аккаунта'
     }
   } catch (err: any) {
     errorMessage.value = err.message || 'Ошибка соединения с сервером'
@@ -296,17 +298,20 @@ const handleRegister = async () => {
 <style scoped>
 .auth-modal {
   max-width: 440px;
-  padding: 32px 28px;
+  width: 100%;
+  padding: 28px 28px 32px;
   position: relative;
   background: #0d1424;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 18px;
+  border-radius: 20px;
+  overflow: visible;
+  box-sizing: border-box;
 }
 
 .modal-close-btn {
   position: absolute;
-  top: 18px;
-  right: 18px;
+  top: 16px;
+  right: 16px;
   width: 32px;
   height: 32px;
   border-radius: 8px;
@@ -318,10 +323,11 @@ const handleRegister = async () => {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
+  z-index: 50;
 }
 
 .modal-close-btn:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   color: #ffffff;
 }
 
@@ -332,6 +338,7 @@ const handleRegister = async () => {
   border-radius: 10px;
   padding: 4px;
   margin-bottom: 22px;
+  margin-right: 40px;
 }
 
 .auth-tab {
